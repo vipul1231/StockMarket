@@ -3,10 +3,7 @@ StockMarket
 
 This repo is question design for BACQ company
 
-Question:
-
-Stock Exchange
---------------
+------
 
 Implement an order matching system for a stock exchange.
 

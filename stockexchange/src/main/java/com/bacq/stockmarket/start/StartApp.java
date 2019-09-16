@@ -1,12 +1,15 @@
 package com.bacq.stockmarket.start;
 
+import com.bacq.stockmarket.domain.ExecutedOrder;
 import com.bacq.stockmarket.domain.Order;
+import com.bacq.stockmarket.domain.OrderStatus;
 import com.bacq.stockmarket.domain.OrderType;
 import com.bacq.stockmarket.service.OrderManagement;
 import com.bacq.stockmarket.service.impl.OrderManagementImpl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Scanner;
 
 public class StartApp {
@@ -16,11 +19,53 @@ public class StartApp {
     public static void main(String[] args) throws ParseException {
         StartApp startApp = new StartApp();
         Scanner scanner = new Scanner(System.in);
+        OrderManagement orderManagement = new OrderManagementImpl();
 
-        while (scanner.next() != "\\n"){
+        while (scanner.hasNext()){
             String[] input = scanner.nextLine().split(" ");
-            OrderManagement orderManagement = new OrderManagementImpl();
-            orderManagement.addStockOrder(startApp.createOrder(input));
+
+            Order order = startApp.createOrder(input);
+
+            if(order.getOrderType() == OrderType.SELL){
+                ExecutedOrder executedOrder = orderManagement.verifyAndOrderMatchingSellRequest(order.getStock(),order.getPrice(), order.getQty());
+                startApp.printOrderExecution(executedOrder, order);
+
+                if(executedOrder.getOrderStatus() == OrderStatus.NOT_PROCESSED){
+                    orderManagement.addStockOrder(order);
+                }
+
+                if(executedOrder.getOrderStatus() == OrderStatus.PARTIAL){
+                    int totalExecuted = 0;
+                    for(Order order1 : executedOrder.getOrder()){
+                        totalExecuted += order1.getQty();
+                    }
+                    order.setQty(order.getQty() - totalExecuted);
+                    orderManagement.addStockOrder(order);
+                }
+            }
+            else {
+                ExecutedOrder executedOrder = orderManagement.verifyAndOrderMatchingBuyRequest(order.getStock(), order.getPrice(), order.getQty());
+                startApp.printOrderExecution(executedOrder, order);
+                if(executedOrder.getOrderStatus() == OrderStatus.NOT_PROCESSED){
+                    orderManagement.addStockOrder(order);
+                }
+
+                if(executedOrder.getOrderStatus() == OrderStatus.PARTIAL){
+                    int totalExecuted = 0;
+                    for(Order order1 : executedOrder.getOrder()){
+                        totalExecuted += order1.getQty();
+                    }
+                    order.setQty(order.getQty() - totalExecuted);
+                    orderManagement.addStockOrder(order);
+                }
+            }
+        }
+    }
+
+    private void printOrderExecution(ExecutedOrder executedOrder, Order order){
+        List<Order> ordersList = executedOrder.getOrder();
+        for(Order order1 : ordersList){
+            System.out.println("#"+order1.getOrderId()+" "+order1.getQty()+" "+order1.getPrice()+" #"+order.getOrderId());
         }
     }
 

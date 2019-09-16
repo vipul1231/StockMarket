@@ -16,7 +16,7 @@ public class Order implements Cloneable{
     private int qty;
     private Double price;
 
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public Order clone() throws CloneNotSupportedException {
+        return (Order) super.clone();
     }
 }

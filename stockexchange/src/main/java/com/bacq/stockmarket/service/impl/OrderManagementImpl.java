@@ -19,60 +19,90 @@ public class OrderManagementImpl implements OrderManagement {
 
         if(order.getOrderType() == OrderType.SELL){
 
+            PriorityQueue<Order> sellStockQueue = orderBook.getSellOrders().get(order.getStock());
+
+            if(sellStockQueue == null){
+            PriorityQueue<Order> sellStockNewQueue = new PriorityQueue<>(returnComparator());
+            sellStockNewQueue.add(order);
+            orderBook.getSellOrders().put(order.getStock(), sellStockNewQueue);
+            return;
+            }
+            sellStockQueue.add(order);
         }
         else {
-            PriorityQueue<Order> stockQueue = orderBook.getBuyOrders().get(order.getStock());
-            if(stockQueue == null){
+            PriorityQueue<Order> buyStockQueue = orderBook.getBuyOrders().get(order.getStock());
+            if(buyStockQueue == null){
                 PriorityQueue<Order> orderQueue = new PriorityQueue<>(returnComparator());
                 orderQueue.add(order);
                 orderBook.getBuyOrders().put(order.getStock(),orderQueue);
+                return;
             }
+            buyStockQueue.add(order);
         }
     }
 
     @Override
     public ExecutedOrder verifyAndOrderMatchingBuyRequest(String stock, Double price, int quantity) {
+        PriorityQueue<Order> ordersQueue = orderBook.getSellOrders().get(stock);
+        return processOrder(OrderType.BUY, ordersQueue, price, quantity);
 
-        PriorityQueue<Order> orderQueue = orderBook.getSellOrders().get(stock);
+    }
+
+    @Override
+    public ExecutedOrder verifyAndOrderMatchingSellRequest(String stock, Double price, int quantity) {
+        PriorityQueue<Order> ordersQueue = orderBook.getBuyOrders().get(stock);
+        return processOrder(OrderType.SELL, ordersQueue, price, quantity);
+    }
+
+    private ExecutedOrder processOrder(OrderType orderType, PriorityQueue<Order> orderQueue, Double price, int quantity){
         ExecutedOrder executedOrder = new ExecutedOrder(OrderStatus.NOT_PROCESSED);
 
         if(orderQueue == null || orderQueue.size() == 0){
             return executedOrder;
         }
 
-        for (Order order : orderQueue) {
-            if (price > order.getPrice()) {
-                int remaining = quantity - order.getQty();
-                if (remaining == 0) {
-                    executedOrder.setOrderStatus(OrderStatus.PROCESSED);
-                    executedOrder.setOrder(order);
-                    break;
-                } else if (remaining < 0) {
-                    try {
-                        Order clonedOrder = (Order) order.clone();
-                        executedOrder.setOrder(clonedOrder);
-                        executedOrder.setOrderStatus(OrderStatus.PARTIAL);
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
+        try {
+            while(true){
+                Order order = orderQueue.peek();
+                if(order!=null && ((orderType == OrderType.BUY && price >= order.getPrice()) ||
+                        (orderType == OrderType.SELL && order.getPrice() >= price))){
+                    int remaining = quantity - order.getQty();
+                    if(remaining == 0){
+                        executedOrder.setOrderStatus(OrderStatus.PROCESSED);
+                        executedOrder.addExecutedOrder(orderQueue.poll());
+                        break;
                     }
-                    order.setQty(Math.abs(remaining));
+                    else if(remaining < 0){
+                        Order clonedOrder = order.clone();
+                        clonedOrder.setQty(quantity);
+                        executedOrder.addExecutedOrder(clonedOrder);
+                        executedOrder.setOrderStatus(OrderStatus.PROCESSED);
+                        order.setQty(Math.abs(remaining));
+                        break;
+                    }
+                    else {
+                        quantity = remaining;
+                        executedOrder.addExecutedOrder(order.clone());
+                        executedOrder.setOrderStatus(OrderStatus.PARTIAL);
+                        orderQueue.poll();
+                    }
+                }
+                else {
                     break;
                 }
             }
+        }
+        catch (Exception e){
+            System.out.println("Some exception occurred.");
         }
 
         return executedOrder;
     }
 
-    @Override
-    public ExecutedOrder verifyAndOrderMatchingSellRequest(String stock, Double price, int quantity) {
-        return null;
-    }
-
     /**
-     * Return comparator.
+     * This comparator arrange the queue in order of ascending price then time.
      *
-     * @return
+     * @return Comparator
      */
     private Comparator<Order> returnComparator() {
         return (o1, o2) -> {

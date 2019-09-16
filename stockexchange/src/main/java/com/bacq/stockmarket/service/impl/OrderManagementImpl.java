@@ -54,6 +54,15 @@ public class OrderManagementImpl implements OrderManagement {
         return processOrder(OrderType.SELL, ordersQueue, price, quantity);
     }
 
+    /**
+     * This method process order w.r.t BUY or SELL
+     *
+     * @param orderType     order type
+     * @param orderQueue    order queue
+     * @param price         price
+     * @param quantity      quantity
+     * @return              executed order
+     */
     private ExecutedOrder processOrder(OrderType orderType, PriorityQueue<Order> orderQueue, Double price, int quantity){
         ExecutedOrder executedOrder = new ExecutedOrder(OrderStatus.NOT_PROCESSED);
 

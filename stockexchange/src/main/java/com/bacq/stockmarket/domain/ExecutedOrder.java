@@ -9,14 +9,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ExecutedOrder {
-    private List<Order> order = new ArrayList<>();
+    private List<ProcessedOrder> order = new ArrayList<>();
     private OrderStatus orderStatus;
 
     public ExecutedOrder(OrderStatus orderStatus){
         this.orderStatus = orderStatus;
     }
 
-    public void addExecutedOrder(Order order){
+    public void addExecutedOrder(ProcessedOrder order){
         this.order.add(order);
     }
 }

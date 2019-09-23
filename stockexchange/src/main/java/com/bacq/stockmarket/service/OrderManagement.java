@@ -15,20 +15,16 @@ public interface OrderManagement {
     /**
      * This method takes the BUY request and verify if any order matching with SELL request persist or not.
      *
-     * @param stock Stock name
-     * @param price Stock price
-     * @param qty   Stock quantity
-     * @return      Executed order
+     * @param buyOrder    Buy Order
+     * @return            Executed order
      */
-    ExecutedOrder verifyAndOrderMatchingBuyRequest(String stock, Double price, int qty);
+    ExecutedOrder verifyAndOrderMatchingBuyRequest(Order buyOrder);
 
     /**
      * This method takes the SELL request and verify if any order matching with BUY request persist or not.
      *
-     * @param stock
-     * @param price
-     * @param qty
-     * @return
+     * @param sellOrder Sell order
+     * @return          Executed Order
      */
-    ExecutedOrder verifyAndOrderMatchingSellRequest(String stock, Double price, int qty);
+    ExecutedOrder verifyAndOrderMatchingSellRequest(Order sellOrder);
 }

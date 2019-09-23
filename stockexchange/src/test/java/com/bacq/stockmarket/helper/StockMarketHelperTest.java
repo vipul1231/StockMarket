@@ -47,7 +47,7 @@ public class StockMarketHelperTest {
     }
 
     @Test
-    @Loop.Repeat(times = 3)
+    @Loop.Repeat(times = 4)
     public void takeAndAddStockToOrderBookTest() throws Exception{
         String fileName = inputFileMap.keySet().iterator().next();
         System.out.println("Executing testcase with file: "+fileName);

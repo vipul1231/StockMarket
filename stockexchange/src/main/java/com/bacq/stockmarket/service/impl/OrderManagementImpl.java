@@ -76,14 +76,14 @@ public class OrderManagementImpl implements OrderManagement {
                         (orderType == OrderType.SELL && order.getPrice() >= price))){
                     int remaining = quantity - order.getQty();
                     if(remaining == 0){
-
                         executedOrder.setOrderStatus(OrderStatus.PROCESSED);
                         if(orderType == OrderType.SELL){
                             createProcessedOrder(executedOrder,order.getOrderId(),buyOrSellOrder.getOrderId(),buyOrSellOrder.getQty(), buyOrSellOrder.getPrice());
                         }
                         else {
-                            createProcessedOrder(executedOrder,order.getOrderId(),buyOrSellOrder.getOrderId(),buyOrSellOrder.getQty(), buyOrSellOrder.getPrice());
+                            createProcessedOrder(executedOrder,order.getOrderId(),buyOrSellOrder.getOrderId(),buyOrSellOrder.getQty(), order.getPrice());
                         }
+                        buyOrSellOrderQueue.poll();
                         break;
                     }
                     else if(remaining < 0){

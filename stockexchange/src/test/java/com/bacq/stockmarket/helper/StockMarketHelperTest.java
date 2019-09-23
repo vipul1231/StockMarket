@@ -47,8 +47,12 @@ public class StockMarketHelperTest {
     }
 
     @Test
-    @Loop.Repeat(times = 4)
+    @Loop.Repeat(times = 10)
     public void takeAndAddStockToOrderBookTest() throws Exception{
+        if(inputFileMap.isEmpty()){
+            System.out.println("No more files to execute....");
+            return;
+        }
         String fileName = inputFileMap.keySet().iterator().next();
         System.out.println("Executing testcase with file: "+fileName);
         Scanner scanner = new Scanner(new FileReader(inputFileMap.get(fileName)));
